@@ -1,0 +1,11 @@
+4/15/2025
+We finished up data cleaning and transformation today for our uses later in the project
+This included fixing column names and creation of vector representations of the emotions/activites
+present in each journal entry. We then did basic modeling using logistic regression and TD-if 
+vectorization. 
+The resulting accuracy is below
+F1 Score (Macro): 0.12191325514387374
+Precision (Micro): 0.7745901639344263
+Recall (Micro): 0.21380090497737556
+Exact Match Accuracy: 0.030508474576271188
+
