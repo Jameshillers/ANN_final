@@ -15,4 +15,4 @@ The data was collected for the study
 "Lemotif: An Affective Visual Journal Using Deep Neural Networks" by X. Li and Devi Parikh. The journal entries were collected by asking the users two questions:
 What were salient aspects of your day yesterday? 
 How did you feel about them?
-They then were asked to la
+They then were asked to label which emotions are present in the journal entry so they could test if they could identify emotions. 
