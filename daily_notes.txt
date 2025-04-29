@@ -154,4 +154,92 @@ within each emotion. We visualized using heatmaps.
 //
 We can do bar plots per emotion. We can also do logistic regression or Chi-square tests??
 //
+4/29/2024
+These are results from the training using weighted random sampling
+It doesn't seem to have helped at all. Loss even went up on the last epoch which wasn't seen in the previous model and the accuracy/
+F1 scores both were lower. 
+It seems to have helped wtih one or two labels that had very poor accuracy on the previous model like 
+the emotion nostalgic but most others were pretty similar. 
+
+Epoch 10/10
+Training: 100%|██████████| 148/148 [31:03<00:00, 12.59s/it]
+Training Loss: 0.4087
+Evaluating: 100%|██████████| 37/37 [02:03<00:00,  3.33s/it]
+Eval Loss: 0.5742
+F1 Micro: 0.5342
+F1 Macro: 0.4747
+F1 Weighted: 0.5668
+
+Best model was from epoch 9 with F1 micro of 0.5479
+
+ Classification Report:
+
+              precision    recall  f1-score   support
+
+      afraid       0.14      0.50      0.22         2
+       angry       0.18      0.40      0.25         5
+     anxious       0.38      0.78      0.51        23
+     ashamed       0.40      0.50      0.44         4
+     awkward       0.09      0.25      0.13         4
+       bored       0.30      0.53      0.38        15
+        calm       0.53      0.36      0.43        87
+    confused       0.25      0.29      0.27         7
+   disgusted       0.00      0.00      0.00         3
+     excited       0.22      0.48      0.31        46
+  frustrated       0.50      0.64      0.56        28
+       happy       0.74      0.69      0.71       153
+     jealous       0.00      0.00      0.00         0
+   nostalgic       0.05      0.83      0.10         6
+       proud       0.49      0.53      0.51        66
+         sad       0.17      0.67      0.27         6
+   satisfied       0.49      0.68      0.57       124
+   surprised       0.06      0.20      0.10        10
+    exercise       0.82      0.94      0.88        34
+      family       0.81      0.57      0.67        53
+        food       0.94      0.83      0.88        41
+     friends       0.64      0.80      0.71        20
+         god       0.84      0.84      0.84        19
+      health       0.59      0.62      0.60        26
+        love       0.16      0.70      0.25        10
+  recreation       0.50      0.62      0.56        16
+      school       0.50      1.00      0.67         1
+       sleep       0.81      0.93      0.87        28
+        work       0.83      0.74      0.79        47
+
+   micro avg       0.48      0.64      0.55       884
+   macro avg       0.43      0.58      0.46       884
+weighted avg       0.59      0.64      0.60       884
+ samples avg       0.52      0.65      0.54       884
+
+
+ Per-Class Accuracy:
+afraid: 0.9763
+angry: 0.9593
+anxious: 0.8814
+ashamed: 0.9831
+awkward: 0.9559
+bored: 0.9119
+calm: 0.7186
+confused: 0.9627
+disgusted: 0.9729
+excited: 0.6610
+frustrated: 0.9051
+happy: 0.7119
+jealous: 0.9932
+nostalgic: 0.7017
+proud: 0.7729
+sad: 0.9254
+satisfied: 0.5695
+surprised: 0.8746
+exercise: 0.9695
+family: 0.8983
+food: 0.9695
+friends: 0.9559
+god: 0.9797
+health: 0.9288
+love: 0.8610
+recreation: 0.9458
+school: 0.9966
+sleep: 0.9729
+work: 0.9356
 
