@@ -7,10 +7,15 @@ import seaborn as sns
 
 # %%
 # reading the csv and checking it loads properly
-df = pd.read_csv("data.csv")
+def main()-> None:
+    df = pd.read_csv("data.csv")
+    stu_df = pd.read_csv("student_data.csv")
 
-#print(df.columns)
-df.head(1)
+    df.head(1)
+    stu_df.head(1)
+
+if __name__ == "__main__":
+    main()
 
 
 # %%
@@ -49,14 +54,53 @@ def clean_create_vectors(df):
     df.insert(1, "activity_vectors", attributes)
     return df
 
-#new_df = clean_create_vectors(df)
-#new_df.head()
 
+def create_student_vectors(df: pd.DataFrame)->pd.DataFrame:
+    """
+    This function takes in the pandas data frame from the raw csv file of our classes journal entries
+    It fixes column names and then created vector representations of the emotions and activities
+    that our classmates flagged in the journal entries. It creates an overall vector including 
+    all activities and emotions and vectors specific to emotions and activities. 
+    arguments:
+        df: pandas data frame
+    returns:
+        df: the cleaned and expanded dataset
+    """
+    df.columns = ["timestamp", "journal", "attributes"]
+    labels = ["afraid", "angry", "anxious", "ashamed", "awkward", "bored", "calm", 
+              "confused", "disgusted", "excited", "frustrated", "happy", "jealous", 
+              "nostalgic", "proud", "sad", "satisfied", "surprised", "exercise", "family", 
+              "food", "friends", "god", "health", "love", "recreation", "school", "sleep", 
+              "work"]
+    new_column = []
+    
+    for i in range(len(df)):
+        vec = [0] * len(labels)
+        attributes = df.loc[i, "attributes"]
+        attributes_list = attributes.split(",")
+        for i in range(len(attributes_list)):
+            if attributes_list[i][0]==" ":
+                attributes_list[i] = attributes_list[i][1:] 
+        
+        for j in range(len(attributes_list)):
+            for m in range(len(labels)):
+                if attributes_list[j] == labels[m]:
+                    vec[m]+=1
+        new_column.append(vec)
 
-            
+    df.insert(len(df.columns), "overall_vector", new_column)
+    
+    emotions = []
+    activities = []
 
+    for i in range(len(new_column)):
 
-# %%
-#new_df.head()
+        emotions.append(new_column[i][:18])
+        
+        activities.append(new_column[i][18:])
+
+    df.insert(len(df.columns),"emotion_vectors", emotions)
+    df.insert(len(df.columns),"activity_vectors", activities)
+        
 
 
