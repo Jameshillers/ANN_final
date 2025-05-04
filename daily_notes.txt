@@ -243,3 +243,140 @@ school: 0.9966
 sleep: 0.9729
 work: 0.9356
 
+
+We changed it from a  single 80/20 train/test split with DistilBERT, using inverse‐frequency sample weights, a WeightedRandomSampler, 
+per‐class pos_weight in the BCE loss, a ReduceLROnPlateau scheduler, up to ten epochs with early stopping, and a fixed 0.5 threshold
+to a more robust five‐fold stratified cross‐validation ensemble built on the full bert-base-uncased model. We still use 20 percent of the data 
+as a final test set, but we now train five separate BERT models—each on a different fold of the remaining 80 percent—and average 
+their test‐time probabilities. Sequences are truncated to 128 tokens rather than 512, batch size is now 32, learning rate doubled to 
+2 × 10⁻⁵, and epochs cut to three, with a linear warm‐up scheduler (10 percent of total steps) replacing the plateau scheduler. 
+We also dispensed with explicit sample- or class-weighting in the data loader and loss function, instead relying on stratified 
+folds to balance labels, and after ensembling, we perform a quick grid search over probabilities from 0.00 to 1.00 to find the 
+optimal F₁-maximizing threshold for each label rather than using a one‐size‐fits‐all cutoff. Finally, rather than saving the 
+best model per fold or early-stopping inside each fold, we aggregate all fold predictions, tune thresholds, and produce a single 
+“ensembled” classification report.
+
+Bert Model 1
+Ensembled Classification Report:
+
+              precision    recall  f1-score   support
+
+      afraid       0.01      1.00      0.02         2
+       angry       0.03      1.00      0.07         5
+     anxious       0.09      0.96      0.16        23
+     ashamed       0.02      1.00      0.03         4
+     awkward       0.02      0.50      0.03         4
+       bored       0.12      0.20      0.15        15
+        calm       0.29      1.00      0.46        87
+    confused       0.02      1.00      0.05         7
+   disgusted       0.01      1.00      0.02         3
+     excited       0.23      0.54      0.32        46
+  frustrated       0.15      0.68      0.24        28
+       happy       0.63      0.89      0.74       153
+     jealous       0.00      0.00      0.00         0
+   nostalgic       0.18      0.33      0.24         6
+       proud       0.23      0.94      0.37        66
+         sad       0.04      0.33      0.07         6
+   satisfied       0.52      0.72      0.61       124
+   surprised       0.03      1.00      0.07        10
+...
+   macro avg       0.21      0.63      0.24       884
+weighted avg       0.38      0.72      0.45       884
+ samples avg       0.17      0.70      0.27       884
+
+
+Compared to the previous 3-epoch BERT ensemble, we changed it to make several targeted updates to improve regularization, 
+metric-driven thresholding, and reproducibility. First, training is shortened to just two epochs per fold (down from three) 
+and a 0.3 dropout layer is explicitly inserted before the classification head to combat overfitting. Second, the standard BCE 
+loss has been replaced by a focal‐loss function (with α=1, γ=2) so that hard-to-classify examples receive more gradient focus. 
+Third, instead of only collecting test-set probabilities, we now also capture each fold’s validation logits and labels so we can 
+tune the per-label thresholds on out-of-fold data (using 5-percent increments) before applying them to the ensembled test logits. 
+We also added an OUTPUT_DIR and CSV exports for the averaged test probabilities, final binary predictions, and the optimal thresholds, 
+making downstream analysis and reproducibility much easier. All other core elements—128-token truncation, 32-example batches, 
+a 5-fold stratified split, linear warm-up scheduler, and BERT-base multi-label head—remain the same.
+
+Bert Model 2
+Final Classification Report:
+
+              precision    recall  f1-score   support
+
+      afraid       0.01      1.00      0.02         2
+       angry       0.03      0.40      0.06         5
+     anxious       0.08      1.00      0.14        23
+     ashamed       0.02      0.50      0.03         4
+     awkward       0.01      1.00      0.03         4
+       bored       0.11      0.20      0.14        15
+        calm       0.29      1.00      0.46        87
+    confused       0.00      0.00      0.00         7
+   disgusted       0.01      1.00      0.02         3
+     excited       0.16      1.00      0.27        46
+  frustrated       0.09      1.00      0.17        28
+       happy       0.52      1.00      0.68       153
+     jealous       0.00      0.00      0.00         0
+   nostalgic       0.02      1.00      0.04         6
+       proud       0.22      1.00      0.37        66
+         sad       0.00      0.00      0.00         6
+   satisfied       0.42      1.00      0.59       124
+   surprised       0.03      1.00      0.07        10
+    exercise       0.12      1.00      0.21        34
+      family       0.18      1.00      0.30        53
+        food       0.14      1.00      0.24        41
+     friends       0.07      1.00      0.13        20
+         god       0.06      1.00      0.12        19
+      health       0.09      1.00      0.16        26
+        love       0.03      1.00      0.07        10
+  recreation       0.00      0.00      0.00        16
+      school       0.00      0.00      0.00         1
+       sleep       0.19      0.86      0.31        28
+        work       0.16      1.00      0.27        47
+
+   micro avg       0.13      0.94      0.23       884
+   macro avg       0.11      0.76      0.17       884
+weighted avg       0.25      0.94      0.37       884
+ samples avg       0.13      0.94      0.22       884
+
+
+Next, we added a pre‐training cleanup step to drop any labels that appear in fewer than ten examples 
+(to avoid spurious, “unstable” classes), and we've overhauled how we compute and apply class weights—now using the 
+“effective number” formula to produce a normalized weight vector that gets passed into your focal‐loss function 
+(which itself has been tweaked to α=0.25 and γ=3.0, and now accepts those per‐class weights). we still train a 5-fold 
+BERT-base ensemble with two epochs and a 0.3 dropout layer, but our threshold‐search routine now first applies an asymmetric 
+probability shift (×1.2 − 0.1, clipped to [0,1]) before scanning 5 % steps to maximize F₁, rather than working on raw probabilities.
+
+Final Classification Report:
+
+              precision    recall  f1-score   support
+
+      afraid       0.00      0.00      0.00       2.0
+       angry       0.00      0.00      0.00       5.0
+     anxious       0.08      1.00      0.14      23.0
+     ashamed       0.01      1.00      0.03       4.0
+     awkward       0.04      0.25      0.07       4.0
+       bored       0.05      1.00      0.10      15.0
+        calm       0.29      1.00      0.46      87.0
+    confused       0.00      0.00      0.00       7.0
+   disgusted       0.00      0.00      0.00       3.0
+     excited       0.16      1.00      0.27      46.0
+  frustrated       0.09      1.00      0.17      28.0
+       happy       0.52      1.00      0.68     153.0
+   nostalgic       0.08      0.50      0.14       6.0
+       proud       0.22      1.00      0.37      66.0
+         sad       0.00      0.00      0.00       6.0
+   satisfied       0.42      1.00      0.59     124.0
+   surprised       0.03      1.00      0.07      10.0
+    exercise       0.12      1.00      0.21      34.0
+      family       0.18      1.00      0.30      53.0
+        food       0.14      1.00      0.24      41.0
+     friends       0.07      1.00      0.13      20.0
+         god       0.06      1.00      0.12      19.0
+      health       0.09      1.00      0.16      26.0
+        love       0.03      1.00      0.07      10.0
+  recreation       0.05      1.00      0.10      16.0
+      school       0.00      1.00      0.01       1.0
+       sleep       0.09      1.00      0.17      28.0
+        work       0.16      1.00      0.27      47.0
+
+   micro avg       0.14      0.97      0.24     884.0
+   macro avg       0.11      0.78      0.17     884.0
+weighted avg       0.25      0.97      0.37     884.0
+ samples avg       0.14      0.97      0.24     884.0
