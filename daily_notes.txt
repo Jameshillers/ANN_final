@@ -419,3 +419,24 @@ weighted avg       0.25      0.97      0.37     884.0
    macro avg       0.19      0.47      0.24       884
 weighted avg       0.32      0.77      0.42       884
  samples avg       0.27      0.75      0.38       884
+
+Losing my mind so starting simple-
+Epoch 1/5
+67/67 ━━━━━━━━━━━━━━━━━━━━ 77s 1s/step - auc: 0.4856 - binary_accuracy: 0.5497 - loss: 0.7109 - val_auc: 0.4302 - val_binary_accuracy: 0.6502 - val_loss: 0.6275
+Epoch 2/5
+67/67 ━━━━━━━━━━━━━━━━━━━━ 75s 1s/step - auc: 0.4856 - binary_accuracy: 0.6981 - loss: 0.6177 - val_auc: 0.4674 - val_binary_accuracy: 0.8416 - val_loss: 0.5446
+Epoch 3/5
+67/67 ━━━━━━━━━━━━━━━━━━━━ 67s 994ms/step - auc: 0.4983 - binary_accuracy: 0.8080 - loss: 0.5355 - val_auc: 0.4827 - val_binary_accuracy: 0.8895 - val_loss: 0.4769
+Epoch 4/5
+67/67 ━━━━━━━━━━━━━━━━━━━━ 67s 1s/step - auc: 0.4893 - binary_accuracy: 0.8713 - loss: 0.4746 - val_auc: 0.4936 - val_binary_accuracy: 0.8895 - val_loss: 0.4235
+Epoch 5/5
+67/67 ━━━━━━━━━━━━━━━━━━━━ 67s 998ms/step - auc: 0.4935 - binary_accuracy: 0.8891 - loss: 0.4250 - val_auc: 0.5043 - val_binary_accuracy: 0.8895 - val_loss: 0.3814
+10/10 ━━━━━━━━━━━━━━━━━━━━ 18s 2s/step
+
+Adding class weighting for imbalancing, early stopping, cross validation, threshold optimization, and metrics
+
+Can try to paper's approach next- 
+BERT‑Base backbone + a two‑layer 768‑unit MLP with a sigmoid output head (29 labels).
+BCE‑with‑logits loss for multi‑label training.
+Five‑fold cross‑validation (80 / 20) and checkpoints for each fold.
+normalised accuracy and macro‑F1 at a 0.20 threshold.
