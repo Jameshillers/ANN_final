@@ -1,5 +1,5 @@
 # ANN_final
-This project is aimed at using journaling data to predict emotions from entries. 
+This project is aimed at using journaling data to predict emotions from entries. \n
 
 Files Contained in the Repo
 data_cleaning.ipynb: 
